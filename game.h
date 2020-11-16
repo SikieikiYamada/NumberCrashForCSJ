@@ -1,6 +1,5 @@
-//
-// Created by Yamada Youkai on 2020/11/11.
-//
+
+//game.h
 
 #ifndef NUMBERCRASH_GAME_H
 #define NUMBERCRASH_GAME_H
@@ -13,5 +12,6 @@ typedef struct {
 } GameState ;
 void print_board(GameState *gameState);
 void init_game(GameState *gameState);
-
+void swap_number(int a,int b,int c,int d,GameState *gameState);
+int check_if3(GameState *gameState);
 #endif //NUMBERCRASH_GAME_H
