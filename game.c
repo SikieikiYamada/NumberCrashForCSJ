@@ -42,8 +42,9 @@ int check_if3(GameState *gameState){
     {
         for(int j=i*10;j<=i*10+7;j++)
         {
-            if(gameState->board[j]==gameState->board[j+1]&&gameState->board[j]
-                                                           ==gameState->board[j+2]&&gameState->board[j+2]==gameState->board[j+1])
+            if(gameState->board[j]==gameState->board[j+1]
+            &&gameState->board[j]==gameState->board[j+2]
+            &&gameState->board[j+2]==gameState->board[j+1])
                 return 1;
         }
     }
@@ -51,8 +52,9 @@ int check_if3(GameState *gameState){
     {
         for(int j=i;j<=i+70;j=j+10)
         {
-            if(gameState->board[j]==gameState->board[j+10]&&gameState->board[j]
-                                                            ==gameState->board[j+20]&&gameState->board[j+20]==gameState->board[j+10])
+            if(gameState->board[j]==gameState->board[j+10]
+            &&gameState->board[j]==gameState->board[j+20]
+            &&gameState->board[j+20]==gameState->board[j+10])
                 return 1;
         }
     }
@@ -68,14 +70,99 @@ void swap_number(int a,int b,int c,int d,GameState *gameState){
     gameState->board[a*10+b]=temp;
     gameState->step++;
     ///////////check=0还没写/////////////
-    while(check_if3(gameState)==1)
-    {
+    int temp_score = 0;
+    while(check_if3(gameState)==1){
         //打标记函数
         //更新函数
         //check——if3
         //。。（有点像循环但不知道怎么写
         //（循环结束后）计算this step的总分数
+        temp_score += crash_matrix(gameState);
     }
+    gameState->t_score += temp_score;
+    print_board(gameState);
+}
+
+int crash_matrix(GameState *gameState){
+    int identical[100] = {0}, eliminated = 0, score = 0;
+    for (int i=0;i<10;i++)
+    {
+        for(int j=i*10;j<=i*10+7;j++)
+        {
+            if(gameState->board[j]==gameState->board[j+1]
+               &&gameState->board[j]==gameState->board[j+2]
+               &&gameState->board[j+2]==gameState->board[j+1]) {
+                int points = 9;
+                eliminated += 3;
+                identical[j] = 1;
+                identical[j+1] = 1;
+                identical[j+2] = 1;
+                if (j<=i*10+6 && gameState->board[j]==gameState->board[j+3]){
+                    points = 16;
+                    eliminated += 1;
+                    identical[j+3] = 1;
+                }
+                if (j<=i*10+5 && gameState->board[j]==gameState->board[j+3] && gameState->board[j]==gameState->board[j+4]){
+                    points = 25;
+                    eliminated += 1;
+                    identical[j+4] = 1;
+                }
+                switch (points) {
+                    case 25:
+                        j+=4;
+                        break;
+                    case 16:
+                        j+=3;
+                        break;
+                    default:
+                        j+=2;
+                        break;
+                }
+                score += points;
+            }
+        }
+    }
+    for (int i=0;i<10;i++)
+    {
+        for(int j=i;j<=i+70;j=j+10)
+        {
+            if(gameState->board[j]==gameState->board[j+10]
+               &&gameState->board[j]==gameState->board[j+20]
+               &&gameState->board[j+20]==gameState->board[j+10]) {
+                int points = 9;
+                eliminated += 3;
+                identical[j] = 1;
+                identical[j+10] = 1;
+                identical[j+20] = 1;
+                if (j<=i+60 && gameState->board[j]==gameState->board[j+30]){
+                    points = 16;
+                    eliminated += 1;
+                    identical[j+30] = 1;
+                }
+                if (j<=i+50 && gameState->board[j]==gameState->board[j+30] && gameState->board[j]==gameState->board[j+40]){
+                    points = 25;
+                    eliminated += 1;
+                    identical[j+40] = 1;
+                }
+                switch (points) {
+                    case 25:
+                        j+=4;
+                        break;
+                    case 16:
+                        j+=3;
+                        break;
+                    default:
+                        j+=2;
+                        break;
+                }
+                score += points;
+
+            }
+        }
+    }
+    printf("%d numbers are eliminated!\n", eliminated);
+    //todo
 
 
+    return score;
 }

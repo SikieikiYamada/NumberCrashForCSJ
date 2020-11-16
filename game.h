@@ -14,4 +14,5 @@ void print_board(GameState *gameState);
 void init_game(GameState *gameState);
 void swap_number(int a,int b,int c,int d,GameState *gameState);
 int check_if3(GameState *gameState);
+int crash_matrix(GameState *gameState);
 #endif //NUMBERCRASH_GAME_H
