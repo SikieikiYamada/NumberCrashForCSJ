@@ -3,4 +3,4 @@ project(NumberCrash C)
 
 set(CMAKE_C_STANDARD 11)
 
-add_executable(NumberCrash main.c game.c game.h)
+add_executable(NumberCrash main.c game.c game.h tinymt32.c tinymt32.h)

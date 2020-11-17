@@ -1,13 +1,14 @@
 //main.c
 #include <stdio.h>
 #include "game.h"
+#include "tinymt32.h"
 #include <string.h>
 GameState gameState;
 GameState *gameState_ptr=&gameState;
 int main() {
-    printf("Hello, World!\n");
     init_game(gameState_ptr);
     print_board(gameState_ptr);
+
     char *input = "";
     int a, b, c, d;
     while (gameState_ptr->step < 100) {
@@ -28,6 +29,8 @@ int main() {
 
     }
     //打印得分函数
+    printf("\nYour final total score is: %d\n",gameState_ptr->t_score);
+
 
     return 0;
 
