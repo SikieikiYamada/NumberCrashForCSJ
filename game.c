@@ -3,11 +3,10 @@
 #include <string.h>
 #include <stdio.h>
 #include "game.h"
+#include <stdlib.h>
 #include "tinymt32.h"
 
-tinymt32_t tinymt32;
-tinymt32_t *random = &tinymt32;
-uint32_t seed = 0;
+
 
 void print_board(GameState *gameState){
     printf("############## STEP %d ###############\n",gameState->step);
@@ -42,6 +41,7 @@ void init_game(GameState *gameState){
     gameState->random = &gameState->tinymt32;
     gameState->seed = 0;
     tinymt32_init(gameState->random, gameState->seed);
+//    srand(0);
 
 }
 
@@ -78,7 +78,7 @@ void swap_number(int a,int b,int c,int d,GameState *gameState){
     gameState->board[c*10+d]=gameState->board[a*10+b];
     gameState->board[a*10+b]=temp;
     gameState->step++;
-    ///////////check=0还没写/////////////
+    printf("Numbers at %d and %d are swapped.\n", a*10+b, c*10+d);
     int temp_score = 0;
     while(check_if3(gameState)==1){
         //计算分数，消数字
@@ -87,7 +87,7 @@ void swap_number(int a,int b,int c,int d,GameState *gameState){
     //（循环结束后）计算this step的总分数
     printf("Score obtained in this step: %d\n", temp_score);
     gameState->t_score += temp_score;
-    print_board(gameState);
+//    print_board(gameState);
 }
 
 //返回一次的得分
@@ -115,12 +115,15 @@ int crash_matrix(GameState *gameState){
                 switch (points) {
                     case 25:
                         j+=4;
+                        printf("5 numbers are eliminated!\n");
                         break;
                     case 16:
                         j+=3;
+                        printf("4 numbers are eliminated!\n");
                         break;
                     default:
                         j+=2;
+                        printf("3 numbers are eliminated!\n");
                         break;
                 }
                 score += points;
@@ -149,12 +152,15 @@ int crash_matrix(GameState *gameState){
                 switch (points) {
                     case 25:
                         j+=4;
+                        printf("5 numbers are eliminated!\n");
                         break;
                     case 16:
                         j+=3;
+                        printf("4 numbers are eliminated!\n");
                         break;
                     default:
                         j+=2;
+                        printf("3 numbers are eliminated!\n");
                         break;
                 }
                 score += points;
@@ -163,11 +169,6 @@ int crash_matrix(GameState *gameState){
         }
     }
 
-    //计算消掉的数量
-    for (int i = 0; i < 100; ++i) {
-        if (identical[i]) eliminated++;
-    }
-    printf("%d numbers are eliminated!\n", eliminated);
 
     //下落
     for (int i = 0; i < 100; ++i) {
@@ -197,5 +198,6 @@ void pull_down(GameState *gameState){
 void generate_new(GameState *gameState){
     for (int i = 0; i < 100; ++i) {
         if (gameState->board[i]==-1) gameState->board[i] = (int)(tinymt32_generate_uint32(gameState->random)%4+1);
+//        if (gameState->board[i]==-1) gameState->board[i] = (int)(rand()%4+1);
     }
 }
