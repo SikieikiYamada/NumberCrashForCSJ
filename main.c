@@ -4,15 +4,14 @@
 #include "game.h"
 #include "tinymt32.h"
 #include <string.h>
-GameState gameState;
-GameState *gameState_ptr=&gameState;
+
 int main() {
-    init_game(gameState_ptr);
+    init_game();
 
     char input[10];
     int a, b, c, d;
-    while (gameState_ptr->step < 100) {
-        print_board(gameState_ptr);
+    while (call_step() < 100) {
+        print_board();
         scanf("%s", input);
         a = input[0] - '0';
         b = input[1] - '0';
@@ -24,14 +23,14 @@ int main() {
             printf("Please enter a valid commend\n");
             continue;
         }
-        swap_number(a, b, c, d,gameState_ptr);
+        swap_number(a, b, c, d);
 
 
 
     }
     //打印得分函数
-    printf("total score : %d\n",gameState_ptr->t_score);
-    printf("mean score : %f", (float)gameState_ptr->t_score);
+    printf("total score : %d\n", call_score());
+    printf("mean score : %f", (float)call_score());
 
 
 
