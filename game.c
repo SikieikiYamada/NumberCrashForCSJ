@@ -1,6 +1,7 @@
 
 //game.c
 #include <string.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include "game.h"
 #include "tinymt32.h"
@@ -47,18 +48,39 @@ void print_board(GameState *gameState){
 }
 
 void init_game(GameState *gameState){
-    int ini_board[100]={
-            3, 3, 1, 2, 4 ,4, 3, 3, 4, 1,
-            2, 3, 1, 4, 3 ,3, 4, 2, 3 ,2,
-            1, 1, 2, 3, 1 ,3, 2 ,1 ,3, 4,
-            2, 3, 3, -1, -1, -1, 3, 3 ,2, 3,
-            1, 2, 2, 1, 3 ,3 ,-1 ,1 ,3 ,2,
-            1, 1, 2, 3, 2 ,3 ,1 ,4 ,3, 4,
-            2, 2, 3, 3, 2 ,1, 2 ,2, 1, 4,
-            1, 1, 2, 4, -4, 1, 1 ,3 ,3 ,1,
-            1, 3, 1, 4, 1, 4, 2 ,2 ,4 ,4,
-            4, 3, 2, 3 ,1 ,1, 2 ,1, 2, 2
-    };
+//    int ini_board[100]={
+//            3, 3, 1, 2, 4 ,4, 3, 3, 4, 1,
+//            2, 3, 1, 4, 3 ,3, 4, 2, 3 ,2,
+//            1, 1, 2, 3, 1 ,3, 2 ,1 ,3, 4,
+//            2, 3, 3, -1, -1, -1, 3, 3 ,2, 3,
+//            1, 2, 2, 1, 3 ,3 ,-1 ,1 ,3 ,2,
+//            1, 1, 2, 3, 2 ,3 ,1 ,4 ,3, 4,
+//            2, 2, 3, 3, 2 ,1, 2 ,2, 1, 4,
+//            1, 1, 2, 4, -4, 1, 1 ,3 ,3 ,1,
+//            1, 3, 1, 4, 1, 4, 2 ,2 ,4 ,4,
+//            4, 3, 2, 3 ,1 ,1, 2 ,1, 2, 2
+//    };
+
+    int ini_board[100], stone_list[11];
+    for (int i = 0; i < 100; ++i) {
+        ini_board[i] = (int)(rand()%4+1);
+    }
+    int stones = (int)(rand()%10+1);
+    int m = 0;
+    for (; m < stones; ++m) {
+        stone_list[m] =  (int)(rand()%100+1);
+    }
+    for (; m < 11; ++m){
+        stone_list[m] = -1;
+    }
+    for (int j = 0; j < stones-1; ++j) {
+        if (stone_list[j] < 0){
+            break;
+        }
+        ini_board[stone_list[j]] = -1;
+    }
+    ini_board[stones-1] = -4;
+
     for(int i=0;i<100;i++)
         gameState->board[i]=ini_board[i];
     gameState->step=0;
