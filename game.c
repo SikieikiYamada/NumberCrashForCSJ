@@ -3,49 +3,62 @@
 #include <string.h>
 #include <stdio.h>
 #include "game.h"
-#include <stdlib.h>
 #include "tinymt32.h"
 
-GameState game;
-GameState *gameState = &game;
 
 tinymt32_t random;
 uint32_t seed = 0;
 
-int call_step(){
-    return gameState->step;
-}
 
-int call_score(){
-    return gameState->t_score;
-}
-
-void print_board(){
+void print_step(GameState *gameState){
     printf("############## STEP %d ###############\n",gameState->step);
     printf("Total score: %d\n",gameState->t_score);
+    print_board(gameState);
+    printf("Please enter swapping locations:\n");
+}
+
+void print_board(GameState *gameState){
+
     printf("    0 1 2 3 4 5 6 7 8 9\n");
     printf("   --------------------\n");
     for(int i=0;i<=9;i++) {
         printf("%d | ",i);
-        for (int j = i*10; j <=i*10+9; j++)
-            printf("%d ", gameState->board[j]);
+        for (int j = i*10; j <=i*10+9; j++) {
+            if (gameState->board[j] == -1){
+                printf("@ ");
+            }
+            else if(gameState->board[j] == -2){
+                printf("C ");
+            }
+            else if(gameState->board[j] == -3){
+                printf("! ");
+            }
+            else if(gameState->board[j] == -4){
+                printf("B ");
+            }
+            else {
+                printf("%d ", gameState->board[j]);
+            }
+        }
         printf("\n");
     }
     printf("\n");
-    printf("Please enter swapping locations:\n");
+
 }
 
-void init_game(){
-    int ini_board[100]={1,2,3,4,3,2,3,2,3,4,
-                        2,3,4,2,3,4,1,4,1,1,
-                        4,2,3,2,1,1,4,1,4,1,
-                        2,3,4,3,3,4,1,2,1,4,
-                        4,3,3,2,3,1,2,3,2,2,
-                        2,1,4,3,4,1,4,1,2,4,
-                        2,1,1,2,1,4,2,4,3,3,
-                        4,2,4,3,3,1,2,1,1,3,
-                        2,1,1,4,4,2,1,1,4,1,
-                        1,3,4,2,1,2,4,2,1,3};
+void init_game(GameState *gameState){
+    int ini_board[100]={
+            3, 3, 1, 2, 4 ,4, 3, 3, 4, 1,
+            2, 3, 1, 4, 3 ,3, 4, 2, 3 ,2,
+            1, 1, 2, 3, 1 ,3, 2 ,1 ,3, 4,
+            2, 3, 3, -1, -1, -1, 3, 3 ,2, 3,
+            1, 2, 2, 1, 3 ,3 ,-1 ,1 ,3 ,2,
+            1, 1, 2, 3, 2 ,3 ,1 ,4 ,3, 4,
+            2, 2, 3, 3, 2 ,1, 2 ,2, 1, 4,
+            1, 1, 2, 4, -4, 1, 1 ,3 ,3 ,1,
+            1, 3, 1, 4, 1, 4, 2 ,2 ,4 ,4,
+            4, 3, 2, 3 ,1 ,1, 2 ,1, 2, 2
+    };
     for(int i=0;i<100;i++)
         gameState->board[i]=ini_board[i];
     gameState->step=0;
@@ -56,7 +69,7 @@ void init_game(){
 }
 
 //return 0:消除完毕； return 1:继续消除
-int check_if3(){
+int check_if3(GameState *gameState){
     for (int i=0;i<10;i++)
     {
         for(int j=i*10;j<=i*10+7;j++)
@@ -78,10 +91,44 @@ int check_if3(){
         }
     }
     return 0;
-
 }
 
-void swap_number(int a,int b,int c,int d){
+void swap_number(GameState *gameState, int a,int b,int c,int d){
+    int error = 0, bomb = 0;
+    if (gameState->board[c*10+d] == -1 || gameState->board[a*10+b] == -1){
+        printf("You Cannot Move A Stone Block!\n");
+        error = 1;
+    }
+
+    if (error){
+        printf("\n");
+        return;
+    }
+
+    if (gameState->board[c*10+d] == -4 || gameState->board[a*10+b] == -4){
+        int temp_score = 0;
+        bomb = 1;
+        printf("Blocks Bombed!\n");
+        temp_score += 100;
+        for (int i = 0; i < 100; ++i) {
+            if (gameState->board[i] < 0){
+                gameState->board[i] = 0;
+            }
+        }
+        print_board(gameState);
+        pull_down(gameState);
+        print_board(gameState);
+        generate_new(gameState);
+        print_board(gameState);
+        while(check_if3(gameState)){
+            //计算分数，消数字
+            temp_score += crash_matrix(gameState);
+        }
+        printf("Score obtained in this step %d: %d\n", gameState->step, temp_score);
+        gameState->t_score += temp_score;
+        return;
+    }
+
     int temp;
     temp=gameState->board[c*10+d];
     gameState->board[c*10+d]=gameState->board[a*10+b];
@@ -89,18 +136,17 @@ void swap_number(int a,int b,int c,int d){
     gameState->step++;
     printf("Numbers at %d and %d are swapped.\n", a*10+b, c*10+d);
     int temp_score = 0;
-    while(check_if3()==1){
+    while(check_if3(gameState)==1){
         //计算分数，消数字
-        temp_score += crash_matrix();
-        //if (gameState->step==31) break;
+        temp_score += crash_matrix(gameState);
     }
     //（循环结束后）计算this step的总分数
-    printf("Score obtained in this step: %d\n", temp_score);
+    printf("Score obtained in this step %d: %d\n", gameState->step, temp_score);
     gameState->t_score += temp_score;
 }
 
 //返回一次的得分
-int crash_matrix(){
+int crash_matrix(GameState *gameState){
     int identical[100] = {0}, score = 0;
     for (int i=0;i<10;i++)
     {
@@ -108,7 +154,8 @@ int crash_matrix(){
         {
             if(gameState->board[j]==gameState->board[j+1]
                &&gameState->board[j]==gameState->board[j+2]
-               &&gameState->board[j+2]==gameState->board[j+1]) {
+               &&gameState->board[j+2]==gameState->board[j+1]
+               &&gameState->board[j]>0) {
                 int points = 9;
                 identical[j] = 1;
                 identical[j+1] = 1;
@@ -131,19 +178,19 @@ int crash_matrix(){
                     points = 49;
                     identical[j+6] = 1;
                 }
-                if (j<=i*10+3 && gameState->board[j]==gameState->board[j+3] && gameState->board[j]==gameState->board[j+4]
+                if (j<=i*10+2 && gameState->board[j]==gameState->board[j+3] && gameState->board[j]==gameState->board[j+4]
                     && gameState->board[j]==gameState->board[j+5] && gameState->board[j]==gameState->board[j+6]
                     && gameState->board[j]==gameState->board[j+7]){
                     points = 64;
                     identical[j+7] = 1;
                 }
-                if (j<=i*10+3 && gameState->board[j]==gameState->board[j+3] && gameState->board[j]==gameState->board[j+4]
+                if (j<=i*10+1 && gameState->board[j]==gameState->board[j+3] && gameState->board[j]==gameState->board[j+4]
                     && gameState->board[j]==gameState->board[j+5] && gameState->board[j]==gameState->board[j+6]
                     && gameState->board[j]==gameState->board[j+7] && gameState->board[j]==gameState->board[j+8]){
                     points = 81;
                     identical[j+8] = 1;
                 }
-                if (j<=i*10+3 && gameState->board[j]==gameState->board[j+3] && gameState->board[j]==gameState->board[j+4]
+                if (j==i*10 && gameState->board[j]==gameState->board[j+3] && gameState->board[j]==gameState->board[j+4]
                     && gameState->board[j]==gameState->board[j+5] && gameState->board[j]==gameState->board[j+6]
                     && gameState->board[j]==gameState->board[j+7] && gameState->board[j]==gameState->board[j+8]
                     && gameState->board[j]==gameState->board[j+9]){
@@ -152,15 +199,15 @@ int crash_matrix(){
                 }
                 switch (points) {
                     case 100:
-                        j+=90;
+                        j+=9;
                         printf("10 numbers are eliminated!\n");
                         break;
                     case 81:
-                        j+=80;
+                        j+=8;
                         printf("9 numbers are eliminated!\n");
                         break;
                     case 64:
-                        j+=70;
+                        j+=7;
                         printf("8 numbers are eliminated!\n");
                         break;
                     case 49:
@@ -194,7 +241,8 @@ int crash_matrix(){
         {
             if(gameState->board[j]==gameState->board[j+10]
                &&gameState->board[j]==gameState->board[j+20]
-               &&gameState->board[j+20]==gameState->board[j+10]) {
+               &&gameState->board[j+20]==gameState->board[j+10]
+               &&gameState->board[j]>0) {
                 int points = 9;
                 identical[j] = 1;
                 identical[j+10] = 1;
@@ -276,22 +324,24 @@ int crash_matrix(){
         }
     }
 
+    printf("\n");
     //下落
     for (int i = 0; i < 100; ++i) {
-        if (identical[i]) gameState->board[i] = -1;
+        if (identical[i]) gameState->board[i] = 0;
     }
-    pull_down();
-    //if (gameState->step==31) return score;
-    generate_new();
+    print_board(gameState);
+    pull_down(gameState);
+    print_board(gameState);
+    generate_new(gameState);
 
     return score;
 }
 
-void pull_down(){
+void pull_down(GameState *gameState){
     int temp;
     for (int i = 0; i < 10; ++i) {
         for (int j = i*10; j < i*10+10; ++j) {
-            if (i>0 && gameState->board[j]==-1){
+            if (i>0 && gameState->board[j]==0){
                 for (int k = j; k >= 10; k-= 10) {
                     temp = gameState->board[k];
                     gameState->board[k] = gameState->board[k-10];
@@ -302,10 +352,10 @@ void pull_down(){
     }
 }
 
-void generate_new(){
+void generate_new(GameState *gameState){
     for (int i = 0; i < 10; ++i) {
         for (int j = i*10; j < i*10+10; j++) {
-            if (gameState->board[j]==-1) gameState->board[j] = (int)(tinymt32_generate_uint32(&random)%4+1);
+            if (gameState->board[j]==0) gameState->board[j] = (int)(tinymt32_generate_uint32(&random)%4+1);
         }
     }
 }

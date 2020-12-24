@@ -12,13 +12,12 @@ typedef struct {
 
 } GameState ;
 
-int call_step();
-int call_score();
-void print_board();
-void init_game();
-void swap_number(int a,int b,int c,int d);
-int check_if3();
-int crash_matrix();
-void pull_down();
-void generate_new();
+void print_step(GameState *gameState);
+void print_board(GameState *gameState);
+void init_game(GameState *gameState);
+void swap_number(GameState *gameState, int a,int b,int c,int d);
+int check_if3(GameState *gameState);
+int crash_matrix(GameState *gameState);
+void pull_down(GameState *gameState);
+void generate_new(GameState *gameState);
 #endif //NUMBERCRASH_GAME_H
